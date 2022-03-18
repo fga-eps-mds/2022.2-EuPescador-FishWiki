@@ -31,7 +31,6 @@ interface ISheet {
 }
 
 const fishLogSeed = async () => {
-
   const columnToKey = {
     A: 'largeGroup',
     B: 'group',
@@ -51,77 +50,55 @@ const fishLogSeed = async () => {
   };
 
   try {
-    const fishWiki = await FishWiki.find();
-
     const result: ISheet = await excelToJson({
-      sourceFile: 'src/utils/seed/planilha-dados1.xlsx',
+      sourceFile: 'src/utils/seed/planilha-dados.xlsx',
       header: {
         rows: 1,
       },
       columnToKey,
     });
-
-    let fish = {
-      [Symbol.asyncIterator]() {
-        return {
-          i: 0,
-          next() {
-            if (this.i < result.Plan2.length) {
-              return new Promise(resolve => {
-                let obj = { value:{
-                  largeGroup: result.Plan2[this.i].largeGroup,
-                  group: result.Plan2[this.i].group,
-                  commonName: result.Plan2[this.i].commonName,
-                  scientificName: result.Plan2[this.i].scientificName,
-                  family: result.Plan2[this.i].family,
-                  food: result.Plan2[this.i].food,
-                  habitat: result.Plan2[this.i].habitat,
-                  maxSize: result.Plan2[this.i].maxSize,
-                  maxWeight: result.Plan2[this.i].maxWeight,
-                  isEndemicInfo: result.Plan2[this.i].isEndemicInfo,
-                  isEndemic: !!(
-                    result.Plan2[this.i].isEndemicInfo !== undefined &&
-                    result.Plan2[this.i].isEndemicInfo.toLowerCase().includes('sim')
-                  ),
-                  isThreatenedInfo: result.Plan2[this.i].isThreatenedInfo,
-                  isThreatened: !!(
-                    result.Plan2[this.i].isThreatenedInfo !== undefined &&
-                    result.Plan2[this.i].isThreatenedInfo.toLowerCase().includes('sim')
-                  ),
-                  hasSpawningSeasonInfo: result.Plan2[this.i].hasSpawningSeasonInfo,
-                  hasSpawningSeason: !!(
-                    result.Plan2[this.i].hasSpawningSeasonInfo !== undefined &&
-                    result.Plan2[this.i].hasSpawningSeasonInfo.toLowerCase().includes('sim')
-                  ),
-                  wasIntroducedInfo: result.Plan2[this.i].wasIntroducedInfo,
-                  wasIntroduced: !!(
-                    result.Plan2[this.i].wasIntroducedInfo !== undefined &&
-                    result.Plan2[this.i].wasIntroducedInfo.toLowerCase().includes('sim')
-                  ),
-                  funFact: result.Plan2[this.i].funFact,
-                  photo: result.Plan2[this.i].photo,
-                }, done:false};
-                setTimeout(resolve, 0.01, obj);
-              });
-            }
-            return Promise.resolve({done:true});
-          }
-        };
-
-      }
-    };
-
-  (async function () {
-      FishWiki.create(fish);
-    
-  })();
-
-
-} catch (error) {
-  console.log('Não foi possível popular a planilha!');
-  console.log(error);
-}
-
+    for (let i = 0; i < result.Plan2.length; i += 1) {
+      const fish = {
+        largeGroup: result.Plan2[i].largeGroup,
+        group: result.Plan2[i].group,
+        commonName: result.Plan2[i].commonName,
+        scientificName: result.Plan2[i].scientificName,
+        family: result.Plan2[i].family,
+        food: result.Plan2[i].food,
+        habitat: result.Plan2[i].habitat,
+        maxSize: result.Plan2[i].maxSize,
+        maxWeight: result.Plan2[i].maxWeight,
+        isEndemicInfo: result.Plan2[i].isEndemicInfo,
+        isEndemic: !!(
+          result.Plan2[i].isEndemicInfo !== undefined &&
+          result.Plan2[i].isEndemicInfo.toLowerCase().includes('sim')
+        ),
+        isThreatenedInfo: result.Plan2[i].isThreatenedInfo,
+        isThreatened: !!(
+          result.Plan2[i].isThreatenedInfo !== undefined &&
+          result.Plan2[i].isThreatenedInfo.toLowerCase().includes('sim')
+        ),
+        hasSpawningSeasonInfo: result.Plan2[i].hasSpawningSeasonInfo,
+        hasSpawningSeason: !!(
+          result.Plan2[i].hasSpawningSeasonInfo !== undefined &&
+          result.Plan2[i].hasSpawningSeasonInfo.toLowerCase().includes('sim')
+        ),
+        wasIntroducedInfo: result.Plan2[i].wasIntroducedInfo,
+        wasIntroduced: !!(
+          result.Plan2[i].wasIntroducedInfo !== undefined &&
+          result.Plan2[i].wasIntroducedInfo.toLowerCase().includes('sim')
+        ),
+        funFact: result.Plan2[i].funFact,
+        photo: result.Plan2[i].photo,
+      };
+      // eslint-disable-next-line no-await-in-loop
+      await FishWiki.create(fish);
+    }
+    console.log('Planilha populada com sucesso!');
+  } catch (error) {
+    console.log('Não foi possível popular a planilha!');
+    console.log(error);
+  }
 };
 
 export default fishLogSeed;
