@@ -58,7 +58,7 @@ const fishLogSeed = async () => {
       return;
     }
     const result: ISheet = await excelToJson({
-      sourceFile: 'src/utils/seed/PlanilhaFINAL.xlsx',
+      sourceFile: 'src/utils/seed/planilha-dados.xlsx',
       header: {
         rows: 1,
       },
@@ -98,11 +98,11 @@ const fishLogSeed = async () => {
         funFact: result.Plan2[i].funFact,
         photo: result.Plan2[i].photo,
       };
-      console.log("PHOTO: " + result.Plan2[i].photo)
       // eslint-disable-next-line no-await-in-loop
-      await FishWiki.create(fish);
+      await FishWiki.create(fish);    
     }
     console.log('Planilha populada com sucesso!');
+    
   } catch (error) {
     console.log('Não foi possível popular a planilha!');
     console.log(error);
