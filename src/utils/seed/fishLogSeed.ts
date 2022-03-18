@@ -39,24 +39,17 @@ const fishLogSeed = async () => {
     E: 'family',
     F: 'food',
     G: 'habitat',
-    H: 'sizeMax',
+    H: 'maxSize',
     I: 'maxWeight',
     J: 'isEndemicInfo',
-    K: 'isEndemic',
-    L: 'isThreatenedInfo',
-    M: 'isThreatened',
-    N: 'hasSpawningSeasonInfo',
-    O: 'hasSpawningSeason',
-    P: 'wasIntroducedInfo',
-    Q: 'wasIntroduced',
-    R: 'funFact',
+    K: 'isThreatenedInfo',
+    L: 'hasSpawningSeasonInfo',
+    M: 'wasIntroducedInfo',
+    N: 'funFact',
     S: 'photo',
   };
+
   try {
-    const fishWiki = await FishWiki.find();
-    if (fishWiki.length > 0) {
-      return;
-    }
     const result: ISheet = await excelToJson({
       sourceFile: 'src/utils/seed/planilha-dados.xlsx',
       header: {
@@ -99,10 +92,9 @@ const fishLogSeed = async () => {
         photo: result.Plan2[i].photo,
       };
       // eslint-disable-next-line no-await-in-loop
-      await FishWiki.create(fish);    
+      await FishWiki.create(fish);
     }
     console.log('Planilha populada com sucesso!');
-    
   } catch (error) {
     console.log('Não foi possível popular a planilha!');
     console.log(error);
