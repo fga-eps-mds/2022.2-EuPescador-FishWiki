@@ -1,20 +1,13 @@
-import { Pool } from 'pg'
-import fishLogSeed from '../utils/seed/fishLogSeed';
+import { DataSource } from 'typeorm'
 
-const databaseConnect = async () => {
-  try {
-    const pool = new Pool({
-      user: '',
-      host: '',
-      database: '',
-      password: '',
-      port: 2
-  });
-  return pool;
-    await fishLogSeed();
-  } catch (error) {
-    console.log('Não foi possível inicicializar corretamente a base de dados!');
-    console.log(error);
-  }
-};
-export default databaseConnect;
+export const connection =  new DataSource({
+  type: "postgres",
+  host: "db",
+  port: 5434,
+  username: "root",
+  password: "admin",
+  database: "user",
+  entities: [],
+  synchronize: true,
+  logging: false
+});

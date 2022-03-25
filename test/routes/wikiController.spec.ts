@@ -1,8 +1,10 @@
 import { Response, Request } from 'express';
 import WikiController from '../../src/controllers/fishWikiController';
-import fishWiki from '../../src/models/fishWiki';
+import {FishWiki} from '../../src/models/fishWiki';
+import { connection } from '../../src/config/database';
 
 const wikiController = new WikiController();
+
 const wikiMock = {
   _id: '32423423565',
   largeGroup: 'couro',
@@ -74,6 +76,8 @@ const mockResponse = () => {
 describe('Test create Wiki function', () => {
   it('should get status code 200', async () => {
     const mockRequest = {} as Request;
+    const fishWikiRepository = connection.getRepository(FishWiki); 
+
     mockRequest.body = {
       largeGroup: 'couro',
       group: 'Mandís',
@@ -92,16 +96,18 @@ describe('Test create Wiki function', () => {
       photo: '',
     };
     const response = mockResponse();
-    fishWiki.findOne = jest.fn();
+    fishWikiRepository.findOne = jest.fn();
     jest
-      .spyOn(fishWiki, 'create')
-      .mockImplementationOnce(() => Promise.resolve());
+      .spyOn(fishWikiRepository, 'save')
+      .mockImplementationOnce(() => Promise.resolve({id: 1}));
     const res = await wikiController.createFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('should get a status code 409 if provided already used species', async () => {
     const mockRequest = {} as Request;
+    const fishWikiRepository = connection.getRepository(FishWiki); 
+
     mockRequest.body = {
       largeGroup: 'couro',
       group: 'Mandís',
@@ -121,19 +127,22 @@ describe('Test create Wiki function', () => {
     };
 
     const response = mockResponse();
-    fishWiki.findOne = jest.fn().mockImplementationOnce(() => ({
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce(wikiMock),
     }));
 
     jest
-      .spyOn(fishWiki, 'create')
-      .mockImplementationOnce(() => Promise.resolve());
+      .spyOn(fishWikiRepository, 'save')
+      .mockImplementationOnce(() => Promise.resolve({id: 1}));
     const res = await wikiController.createFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(409);
   });
+
   it('should get a status code 500 request failed', async () => {
     const response = mockResponse();
-    fishWiki.find = jest
+    const fishWikiRepository = connection.getRepository(FishWiki); 
+
+    fishWikiRepository.find = jest
       .fn()
       .mockImplementationOnce(() => Promise.reject(Error('Request Failure')));
     const res = await wikiController.getAllFish(mockRequestDefault, response);
@@ -147,7 +156,9 @@ describe('Test Get All Wiki function', () => {
     mockRequest.query = {};
 
     const response = mockResponse();
-    fishWiki.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
     const res = await wikiController.getAllFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
@@ -158,7 +169,9 @@ describe('Test Get All Wiki function', () => {
       largeGroup: 'couro',
     };
     const response = mockResponse();
-    fishWiki.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
     const res = await wikiController.getAllFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
@@ -170,14 +183,19 @@ describe('Test Get All Wiki function', () => {
       group: 'famosos',
     };
     const response = mockResponse();
-    fishWiki.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+
+    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
     const res = await wikiController.getAllFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('should get a status code 500 request failed', async () => {
     const response = mockResponse();
-    fishWiki.find = jest
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.find = jest
       .fn()
       .mockImplementationOnce(() => Promise.reject(Error('Request Failure')));
     const res = await wikiController.getAllFish(mockRequestDefault, response);
@@ -188,7 +206,9 @@ describe('Test Get All Wiki function', () => {
 describe('Test Get One Wiki function', () => {
   it('should get a status code 200', async () => {
     const response = mockResponse();
-    fishWiki.findById = jest.fn().mockImplementationOnce(() => ({
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce([wikiMock]),
     }));
     const res = await wikiController.getOneFishWiki(mockReq, response);
@@ -197,18 +217,22 @@ describe('Test Get One Wiki function', () => {
 
   it('should get a statusCode 404 if fishlog not found', async () => {
     const mockRequest = {} as Request;
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
     mockRequest.params = {
       id: '3472417428',
     };
     const response = mockResponse();
-    fishWiki.findById = jest.fn().mockResolvedValueOnce(undefined);
+    fishWikiRepository.findOne = jest.fn().mockResolvedValueOnce(undefined);
     const res = await wikiController.getOneFishWiki(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
   it('should get a status code 500 request failed', async () => {
     const response = mockResponse();
-    fishWiki.find = jest
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.find = jest
       .fn()
       .mockImplementationOnce(() => Promise.reject(Error('Request Failure')));
     const res = await wikiController.getOneFishWiki(

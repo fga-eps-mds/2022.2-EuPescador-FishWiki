@@ -16,15 +16,15 @@ services:
       - '4002:4002'
     command: npm run dev
   db:
-    container_name: "postgresDBWiki"
-    image: "postgis/postgis"
+    container_name: "postgresDbWiki"
+    image: "postgres:latest"
     ports: 
-      - "5431:5431"
+      - "5433:5434"
     volumes:
-      - db_persdata:/var/lib/db
+      - db_persdata:/var/lib/
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: admin
       POSTGRES_DB: user
     networks:
       - default
