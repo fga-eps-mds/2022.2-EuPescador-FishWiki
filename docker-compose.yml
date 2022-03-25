@@ -16,12 +16,19 @@ services:
       - '4002:4002'
     command: npm run dev
   db:
-    container_name: mongoDBWiki
-    image: mongo:latest
-    restart: always
+    container_name: "postgresDBWiki"
+    image: "postgis/postgis"
+    ports: 
+      - "5431:5431"
     volumes:
-      - ./wikiData:/data/db
+      - db_persdata:/var/lib/db
     environment:
-      - MONGO_INITDB_DATABASE=Fish
-    ports:
-      - 27019:27019
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user
+    networks:
+      - default
+networks:
+  default:
+volumes:
+  db_persdata : {}
