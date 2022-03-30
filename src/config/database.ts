@@ -1,3 +1,4 @@
+import { FishWiki } from '../models/fishWiki';
 import { DataSource } from 'typeorm'
 
 export const connection =  new DataSource({
@@ -7,7 +8,7 @@ export const connection =  new DataSource({
   username: "root",
   password: "admin",
   database: "user",
-  entities: [],
+  entities: [FishWiki],
   synchronize: true,
   logging: false
 });
