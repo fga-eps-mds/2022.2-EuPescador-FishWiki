@@ -22,6 +22,14 @@ const fishLogSeed = async () => {
   };
 
   try {
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    const fishes = await fishWikiRepository.find({})
+
+    if(fishes && fishes.length > 0){
+      return;
+    }
+    
     const result = excelToJson({
       sourceFile: `${__dirname}/planilha-dados.xlsx`,
       header: {
@@ -63,7 +71,7 @@ const fishLogSeed = async () => {
       fish.funFact =  fishInfo.funFact;
       fish.photo =  fishInfo.photo;
 
-      const fishWikiRepository = connection.getRepository(FishWiki); 
+      
       await fishWikiRepository.save(fish);
     }
     console.log('Planilha populada com sucesso!');

@@ -49,16 +49,25 @@ export default class FishController {
   getAllFish = async (req: Request, res: Response) => {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki); 
-
+      
       const entries = Object.entries(req.query);
+      
       const nonEmptyOrNull = entries.filter(
         ([, val]) => val !== '' && val !== null
       );
+      
+      if(nonEmptyOrNull && nonEmptyOrNull.length === 0){
+        const allFishWiki = await fishWikiRepository.find({});
+
+        return res.status(200).json(allFishWiki);
+      }
+
       const query = Object.fromEntries(nonEmptyOrNull);
+      
+      const allFilteredFishWiki = await fishWikiRepository.find({where: query});
 
-      const allFishWiki = await fishWikiRepository.find({});
-
-      return res.status(200).json(allFishWiki);
+      return res.status(200).json(allFilteredFishWiki)
+      
     } catch (error) {
       return res.status(500).json({
         message: 'Falha ao processar requisição',
