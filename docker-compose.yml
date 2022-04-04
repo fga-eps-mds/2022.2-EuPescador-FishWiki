@@ -9,19 +9,27 @@ services:
     volumes:
       - ./src:/home/node/app/src
       - ./nodemon.json:/home/node/app/nodemon.json
-    container_name: proespecies-wiki
+    container_name: eu-pescador-wiki
     expose:
       - '4002'
     ports:
       - '4002:4002'
     command: npm run dev
   db:
-    container_name: mongoDBWiki
-    image: mongo:latest
-    restart: always
+    container_name: "postgresDbWiki"
+    image: "postgres:latest"
+    ports: 
+      - "5433:5433"
     volumes:
-      - ./wikiData:/data/db
+      - db_persdata:/var/lib/db
+    command: postgres -c port=5433
     environment:
-      - MONGO_INITDB_DATABASE=Fish
-    ports:
-      - 27019:27019
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: user
+    networks:
+      - default
+networks:
+  default:
+volumes:
+  db_persdata : {}

@@ -1,122 +1,65 @@
-import { Schema, model, Document } from 'mongoose';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export interface IFish extends Document {
-  largeGroup: string;
-  group: string;
-  commonName: string;
-  scientificName: string;
-  family: string;
-  food: string;
-  habitat: string;
-  maxSize: number;
-  maxWeight: number;
-  isEndemicInfo: string;
-  isEndemic: boolean;
-  isThreatenedInfo: string;
-  isThreatened: boolean;
-  hasSpawningSeasonInfo: string;
-  hasSpawningSeason: boolean;
-  wasIntroducedInfo: string;
-  wasIntroduced: boolean;
-  funFact: string;
-  photo: string;
+@Entity('fishWiki')
+export class FishWiki {
+  @PrimaryGeneratedColumn("increment")
+    id?: number
+    
+  @Column({nullable: true})
+  largeGroup?: string;
+
+  @Column({nullable: true})
+  group?: string;
+  
+  @Column({nullable: true})
+  commonName?: string;
+
+  @Column({nullable: true})
+  scientificName?: string;
+
+  @Column({nullable: true})
+  family?: string;
+
+  @Column({nullable: true})
+  food?: string;
+
+  @Column({nullable: true})
+  habitat?: string;
+
+  @Column({nullable: true, type: 'real'})
+  maxSize?: string;
+
+  @Column({nullable: true, type: 'real'})
+  maxWeight?: string;
+
+  @Column({nullable: true})
+  isEndemicInfo?: string;
+
+  @Column({nullable: true})
+  isEndemic?: boolean;
+
+  @Column({nullable: true})
+  isThreatenedInfo?: string;
+
+  @Column({nullable: true})
+  isThreatened?: boolean;
+
+  @Column({nullable: true})
+  hasSpawningSeasonInfo?: string;
+
+  @Column({nullable: true})
+  hasSpawningSeason?: boolean;
+
+  @Column({nullable: true})
+  wasIntroducedInfo?: string;
+
+  @Column({nullable: true})
+  wasIntroduced?: boolean;
+
+  @Column({nullable: true})
+  funFact?: string;
+
+  @Column({nullable: true})
+  photo?: string;
 }
 
-const fishSchema = new Schema<IFish>({
-  largeGroup: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  group: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  commonName: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  scientificName: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  family: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  food: {
-    type: String,
-    trim: true,
-  },
-  habitat: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  maxSize: {
-    type: Number,
-    trim: true,
-  },
-  maxWeight: {
-    type: Number,
-    required: false,
-    trim: true,
-  },
-  isEndemicInfo: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  isEndemic: {
-    type: Boolean,
-    required: false,
-    trim: true,
-  },
-  isThreatenedInfo: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  isThreatened: {
-    type: Boolean,
-    required: false,
-    trim: true,
-  },
-  wasIntroducedInfo: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  wasIntroduced: {
-    type: Boolean,
-    required: false,
-    trim: true,
-  },
-  hasSpawningSeasonInfo: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  hasSpawningSeason: {
-    type: Boolean,
-    required: false,
-    trim: true,
-  },
-  funFact: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  photo: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-});
-
-export default model<IFish>('FishWiki', fishSchema);
