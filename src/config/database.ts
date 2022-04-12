@@ -1,14 +1,14 @@
 import { FishWiki } from '../models/fishWiki';
-import { DataSource } from 'typeorm'
+import { DataSource } from 'typeorm';
 
-export const connection =  new DataSource({
-  type: "postgres",
-  host: "db",
+export const connection = new DataSource({
+  type: 'postgres',
+  host: process.env.POSTGRES_HOST || 'db',
   port: 5433,
-  username: "root",
-  password: "admin",
-  database: "user",
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
   entities: [FishWiki],
   synchronize: true,
-  logging: false
+  logging: false,
 });

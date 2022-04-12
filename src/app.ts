@@ -1,8 +1,7 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import router from './routes/router';
+require('dotenv').config()
 
-dotenv.config();
+import express from 'express';
+import router from './routes/router';
 
 const app = express();
 app.disable('x-powered-by');
