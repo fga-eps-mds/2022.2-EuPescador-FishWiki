@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { FishWiki } from '../models/fishWiki';
 import { DataSource } from 'typeorm';
 
@@ -11,4 +12,11 @@ export const connection = new DataSource({
   entities: [FishWiki],
   synchronize: true,
   logging: false,
+  extra: process.env.POSTGRES_HOST
+    ? {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }
+    : null,
 });
