@@ -52,8 +52,6 @@
     "got": "^11.8.2",
     "jest-sonar": "^0.2.12",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^4.1.0",
-    "mongoose": "^5.13.8",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
