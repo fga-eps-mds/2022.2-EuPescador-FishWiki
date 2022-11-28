@@ -6,9 +6,10 @@
   "scripts": {
     "test": "jest --coverage",
     "start": "NODE_PATH=./build node build/src/server.js",
-    "build": "tsc -p .",
+    "build": "tsc -p . && yarn copy-files",
     "dev": "nodemon src/server.ts",
-    "lint": "eslint \"**/*.{ts,tsx}\""
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "copy-files": "cp ./src/utils/seed/planilha-dados.xlsx ./build/src/utils/seed/planilha-dados.xlsx"
   },
   "repository": {
     "type": "git",
