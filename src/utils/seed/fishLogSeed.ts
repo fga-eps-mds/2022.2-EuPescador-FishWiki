@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 import excelToJson from 'convert-excel-to-json';
-import { connection } from '../../config/database';
-import { FishWiki } from '../../models/fishWiki';
+import { v4 as uuidV4 } from 'uuid';
+import { connection } from '../../database';
+import { FishWiki } from '../../database/entities/fishWiki';
 
 const fishLogSeed = async () => {
   const columnToKey = {
@@ -40,6 +41,7 @@ const fishLogSeed = async () => {
     });
     for await (const fishInfo of result.Plan2) {
       const fish = new FishWiki();
+      fish.id = uuidV4();
       fish.largeGroup = fishInfo.largeGroup;
       fish.group = fishInfo.group;
       fish.commonName = fishInfo.commonName;
@@ -71,7 +73,6 @@ const fishLogSeed = async () => {
       );
       fish.funFact = fishInfo.funFact;
       fish.photo = fishInfo.photo;
-
       await fishWikiRepository.save(fish);
     }
     console.log('Planilha populada com sucesso!');

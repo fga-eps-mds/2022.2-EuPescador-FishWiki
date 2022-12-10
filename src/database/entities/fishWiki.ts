@@ -1,10 +1,11 @@
 /* eslint-disable import/prefer-default-export */
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { v4 as uuidV4 } from 'uuid';
 
 @Entity('fishWiki')
 export class FishWiki {
-  @PrimaryGeneratedColumn('increment')
-  id?: number;
+  @PrimaryColumn()
+  id?: string;
 
   @Column({ nullable: true })
   largeGroup?: string;
@@ -62,4 +63,10 @@ export class FishWiki {
 
   @Column({ nullable: true })
   photo?: string;
+
+  constructor() {
+    if (!this.id) {
+      this.id = uuidV4();
+    }
+  }
 }
