@@ -1,7 +1,7 @@
 import { Response, Request } from 'express';
 import WikiController from '../../src/controllers/fishWikiController';
-import { FishWiki } from '../../src/models/fishWiki';
-import { connection } from '../../src/config/database';
+import { FishWiki } from '../../src/database/entities/fishWiki';
+import { connection } from '../../src/database';
 
 const wikiController = new WikiController();
 
@@ -99,7 +99,7 @@ describe('Test create Wiki function', () => {
     fishWikiRepository.findOne = jest.fn();
     jest
       .spyOn(fishWikiRepository, 'save')
-      .mockImplementationOnce(() => Promise.resolve({ id: 1 }));
+      .mockImplementationOnce(() => Promise.resolve({ id: 'id' }));
     const res = await wikiController.createFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
@@ -133,7 +133,7 @@ describe('Test create Wiki function', () => {
 
     jest
       .spyOn(fishWikiRepository, 'save')
-      .mockImplementationOnce(() => Promise.resolve({ id: 1 }));
+      .mockImplementationOnce(() => Promise.resolve({ id: 'id' }));
     const res = await wikiController.createFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(409);
   });

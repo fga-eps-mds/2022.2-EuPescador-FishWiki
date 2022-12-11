@@ -8,7 +8,11 @@
     "start": "NODE_PATH=./build node build/src/server.js",
     "build": "tsc -p .",
     "dev": "nodemon src/server.ts",
-    "lint": "eslint \"**/*.{ts,tsx}\""
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:generate src/database/migrations/defaut",
+    "migration:run": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:revert",
+    "migration:create": "typeorm-ts-node-commonjs migration:create"
   },
   "repository": {
     "type": "git",
@@ -28,8 +32,9 @@
     "@types/jest": "^27.0.1",
     "@types/node": "^17.0.21",
     "@types/pg": "^8.6.5",
-    "@typescript-eslint/eslint-plugin": "^4.29.3",
-    "@typescript-eslint/parser": "^4.29.3",
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
@@ -58,6 +63,7 @@
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
     "supertest": "^6.1.6",
-    "typeorm": "^0.3.3"
+    "uuid": "^9.0.0",
+    "typeorm": "^0.3.6"
   }
 }
