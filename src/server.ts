@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import app from './app';
-import { connection } from './config/database';
+import { connection } from './database';
 import fishLogSeed from './utils/seed/fishLogSeed';
 
 connection

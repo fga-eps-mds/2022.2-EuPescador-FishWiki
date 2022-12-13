@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { FishWiki } from '../models/fishWiki';
-import { connection } from '../config/database';
+import { FishWiki } from '../database/entities/fishWiki';
+import { connection } from '../database';
 
 export default class FishController {
   createFish = async (req: Request, res: Response) => {
@@ -99,7 +99,7 @@ export default class FishController {
 
       const fishId = req.params.id;
       const fishWiki = await fishWikiRepository.findOne({
-        where: { id: Number(fishId) },
+        where: { id: fishId },
       });
 
       if (!fishWiki) {
