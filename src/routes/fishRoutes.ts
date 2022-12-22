@@ -1,7 +1,11 @@
 import { Request, Response, Router } from 'express';
 import FishController from '../controllers/fishWikiController';
 
+import AuthService from '../middlewares/auth';
+
 const fishWikiRoutes = Router();
+
+const authService = new AuthService();
 
 const fishWikiController = new FishController();
 
@@ -17,11 +21,11 @@ fishWikiRoutes.get('/:id', (req: Request, res: Response) => {
   fishWikiController.getOneFishWiki(req, res);
 });
 
-fishWikiRoutes.delete('/:id', (req: Request, res: Response) => {
+fishWikiRoutes.delete('/:id', authService.authorize, (req: Request, res: Response) => {
   fishWikiController.deleteFish(req, res);
 });
 
-fishWikiRoutes.patch('/:id', (req: Request, res: Response) => {
+fishWikiRoutes.patch('/:id', authService.authorize, (req: Request, res: Response) => {
   fishWikiController.updateFish(req, res);
 });
 
