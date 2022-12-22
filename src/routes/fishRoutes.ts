@@ -17,4 +17,12 @@ fishWikiRoutes.get('/:id', (req: Request, res: Response) => {
   fishWikiController.getOneFishWiki(req, res);
 });
 
+fishWikiRoutes.delete('/:id', (req: Request, res: Response) => {
+  fishWikiController.deleteFish(req, res);
+});
+
+fishWikiRoutes.patch('/:id', (req: Request, res: Response) => {
+  fishWikiController.updateFish(req, res);
+});
+
 export default fishWikiRoutes;
