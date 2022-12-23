@@ -12,7 +12,6 @@ interface Idata {
 export default class AuthService {
   decodeToken = async (token: string) => {
     const decodeToken = decode(token) as Idata;
-    
     return decodeToken;
   };
 
@@ -27,9 +26,8 @@ export default class AuthService {
       });
       const decodeToken = await this.decodeToken(String(token?.split(':')[1].trim()));
       if(!decodeToken.admin) {
-        return res.status(401).json({"message": "usuário não autorizado"})
+        res.status(401).json({"message": "usuário não autorizado"});
       }
-      console.log("decodeToken: ", decodeToken);
       next();
     } catch (error: any) {
       if (error.response) {
