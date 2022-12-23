@@ -142,10 +142,10 @@ describe('Test create Wiki function', () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
-    fishWikiRepository.find = jest
+    fishWikiRepository.save = jest
       .fn()
-      .mockImplementationOnce(() => Promise.reject(Error('Request Failure')));
-    const res = await wikiController.getAllFish(mockRequestDefault, response);
+      .mockImplementationOnce(() => { throw new Error });
+    const res = await wikiController.createFish(mockRequestDefault, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
