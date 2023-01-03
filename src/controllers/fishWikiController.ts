@@ -114,4 +114,65 @@ export default class FishController {
       });
     }
   };
+
+  deleteFish = async (req: Request, res: Response) => {
+    try {
+      const fishWikiRepository = connection.getRepository(FishWiki);
+
+      const fishId = req.params.id;
+      const fishWiki = await fishWikiRepository.findOne({
+        where: { id: fishId },
+      });
+
+      if (!fishWiki) {
+        return res.status(404).json({
+          message: 'Peixe não encontrado',
+        });
+      }
+
+      await fishWikiRepository.createQueryBuilder("fishWiki")
+      .delete()
+      .where("id = :id", {id: fishId})
+      .execute();
+
+      return res.status(200).json(fishWiki);
+
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Falha ao processar requisição',
+      });
+    }
+  }
+
+  updateFish = async (req: Request, res: Response) => {
+    try {
+      const fishWikiRepository = connection.getRepository(FishWiki);
+
+      const fishId = req.params.id;
+
+      const fishWiki = await fishWikiRepository.findOne({
+        where: { id: fishId },
+      });
+
+      if (!fishWiki) {
+        return res.status(404).json({
+          message: 'Peixe não encontrado',
+        });
+      }
+
+      await fishWikiRepository.createQueryBuilder("fishWiki")
+      .update()
+      .set({...req.body})
+      .where("id = :id", {id: fishId})
+      .execute();
+
+      return res.status(200).json({...fishWiki, ...req.body});
+
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Falha ao processar requisição',
+      });
+    }
+  }
+
 }

@@ -142,10 +142,10 @@ describe('Test create Wiki function', () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
-    fishWikiRepository.find = jest
+    fishWikiRepository.save = jest
       .fn()
-      .mockImplementationOnce(() => Promise.reject(Error('Request Failure')));
-    const res = await wikiController.getAllFish(mockRequestDefault, response);
+      .mockImplementationOnce(() => { throw new Error });
+    const res = await wikiController.createFish(mockRequestDefault, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
@@ -241,3 +241,123 @@ describe('Test Get One Wiki function', () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
+
+describe('Test Delete Fish', () => {
+  it('should delete an exist fish', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    const createQueryBuilder: any = {
+      delete: ()  => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => [wikiMock],
+    };
+
+    jest
+    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    const res = await wikiController.deleteFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should return 404 when try to delete an unexist fish', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => (false));
+
+    const res = await wikiController.deleteFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('should return 500', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    const createQueryBuilder: any = {
+      delete: ()  => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => { throw new Error },
+    };
+
+    jest
+    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    const res = await wikiController.deleteFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+})
+
+describe('Test Update Fish', () => {
+  it('should update an exist fish', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    const createQueryBuilder: any = {
+      update: ()  => createQueryBuilder,
+      set: () => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => [wikiMock],
+    };
+
+    jest
+    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    mockReq.body = {
+      food: "new food"
+    }
+
+    const res = await wikiController.updateFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should return 404 when try to update an unexist fish', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => (false));
+
+    const res = await wikiController.updateFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  it('should return 500', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    const createQueryBuilder: any = {
+      update: ()  => createQueryBuilder,
+      set: () => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => { throw new Error },
+    };
+
+    jest
+    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    const res = await wikiController.updateFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+})
