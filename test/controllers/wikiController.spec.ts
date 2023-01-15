@@ -221,8 +221,21 @@ describe('Test Get All Wiki function', () => {
 
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      orderBy: () => createQueryBuilder,
+      getMany: () => [wikiMock],
+    };
 
-    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    fishWikiRepository.createQueryBuilder().getCount = jest
+      .fn()
+      .mockResolvedValueOnce(1);
     const res = await wikiController.getAllFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });

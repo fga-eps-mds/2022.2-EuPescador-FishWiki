@@ -78,15 +78,30 @@ export default class FishController {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
       const entries = Object.entries(req.query);
+      const count = req.query?.count !== undefined ? +req.query.count : 0;
+      const page = req.query?.page !== undefined ? +req.query.page : 1;
+      let totalPages = 1;
 
       const nonEmptyOrNull = entries.filter(
         ([, val]) => val !== '' && val !== null
       );
 
-      if (nonEmptyOrNull && nonEmptyOrNull.length === 0) {
-        const allFishWiki = await fishWikiRepository.find({});
+      if (
+        nonEmptyOrNull &&
+        (nonEmptyOrNull.length === 0 || req.query?.count !== undefined)
+      ) {
+        const allFishWiki = await fishWikiRepository
+          .createQueryBuilder('fishWiki')
+          .select()
+          .skip((page - 1) * count)
+          .take(count)
+          .getMany();
 
-        return res.status(200).json(allFishWiki);
+        const quantityOfUsers = await fishWikiRepository
+          .createQueryBuilder('fishWiki')
+          .getCount();
+        totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
+        return res.status(200).json({ allFishWiki, page, count, totalPages });
       }
 
       const query = Object.fromEntries(nonEmptyOrNull);
