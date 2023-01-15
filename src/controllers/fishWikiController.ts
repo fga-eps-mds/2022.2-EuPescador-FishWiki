@@ -128,7 +128,7 @@ export default class FishController {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
       const fishId = req.params.id;
-      const fishWiki = await fishWikiRepository.findOne({
+      const fish = await fishWikiRepository.findOne({
         where: { id: fishId },
       });
 
@@ -138,7 +138,7 @@ export default class FishController {
         });
       }
 
-      if (!fishWiki) {
+      if (!fish) {
         return res.status(404).json({
           message: 'Peixe não encontrado',
         });

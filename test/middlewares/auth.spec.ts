@@ -1,6 +1,6 @@
 import { Response, Request } from 'express';
 import axios from 'axios';
-import Auth from '../../src/middleware/auth';
+import Auth from '../../src/middlewares/auth';
 
 const authService = new Auth();
 const mockResponse = () => {
@@ -15,7 +15,10 @@ describe('Test middleware authUser', () => {
   it('Should get a statusCode 200 when user have authorization', async () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
-    mockRequest.headers = {};
+
+    mockRequest.headers = {
+      authorization: 'Bearer tokem',
+    };
 
     jest.spyOn(axios, 'get').mockResolvedValue({
       status: 200,
@@ -42,7 +45,6 @@ describe('Test middleware authUser', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {};
-
     jest.spyOn(axios, 'get').mockRejectedValueOnce(mockData);
 
     const res = (await authService.authorize(
