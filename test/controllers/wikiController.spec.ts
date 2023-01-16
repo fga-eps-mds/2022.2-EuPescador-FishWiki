@@ -1,7 +1,8 @@
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import WikiController from '../../src/controllers/fishWikiController';
 import { FishWiki } from '../../src/database/entities/fishWiki';
 import { connection } from '../../src/database';
+import { RequestWithUserRole } from '../../src/Interface/fishLogInterfaces';
 
 const wikiController = new WikiController();
 
@@ -24,7 +25,7 @@ const wikiMock = {
   photo: '',
 };
 
-const mockRequestDefault = {} as Request;
+const mockRequestDefault = {} as RequestWithUserRole;
 
 mockRequestDefault.body = {
   largeGroup: 'couro',
@@ -44,7 +45,7 @@ mockRequestDefault.body = {
   photo: '',
 };
 
-const mockReq = {} as Request;
+const mockReq = {} as RequestWithUserRole;
 mockReq.params = {};
 
 mockReq.body = {
@@ -75,7 +76,7 @@ const mockResponse = () => {
 
 describe('Test create Wiki function', () => {
   it('should get status code 200', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishWikiRepository = connection.getRepository(FishWiki);
 
     mockRequest.body = {
@@ -95,6 +96,13 @@ describe('Test create Wiki function', () => {
       funFact: '',
       photo: '',
     };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
     const response = mockResponse();
     fishWikiRepository.findOne = jest.fn();
     jest
@@ -104,8 +112,8 @@ describe('Test create Wiki function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('should get a status code 409 if provided already used species', async () => {
-    const mockRequest = {} as Request;
+  it('should get status code 401', async () => {
+    const mockRequest = {} as RequestWithUserRole;
     const fishWikiRepository = connection.getRepository(FishWiki);
 
     mockRequest.body = {
@@ -124,6 +132,49 @@ describe('Test create Wiki function', () => {
       wasIntroduced: false,
       funFact: '',
       photo: '',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: false,
+      superAdmin: false,
+    };
+
+    const response = mockResponse();
+    fishWikiRepository.findOne = jest.fn();
+    jest
+      .spyOn(fishWikiRepository, 'save')
+      .mockImplementationOnce(() => Promise.resolve({ id: 'id' }));
+    const res = await wikiController.createFish(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('should get a status code 409 if provided already used species', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    mockRequest.body = {
+      largeGroup: 'couro',
+      group: 'Mandís',
+      commonName: 'Mandí-chumbado',
+      scientificName: 'Aguarunichthys tocantinsensis',
+      family: 'Pimelodidae',
+      food: 'Desconhecida',
+      habitat: 'Nos canais de rios com água corrente',
+      maxSize: 80,
+      maxWeight: 14,
+      isEndemic: 'Endêmica do sistema Araguaia-Tocantins',
+      isThreatened: 'Sim. Categoria Vulnerável',
+      hasSpawningSeason: true,
+      wasIntroduced: false,
+      funFact: '',
+      photo: '',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
     };
 
     const response = mockResponse();
@@ -142,9 +193,16 @@ describe('Test create Wiki function', () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
-    fishWikiRepository.save = jest
-      .fn()
-      .mockImplementationOnce(() => { throw new Error });
+    fishWikiRepository.save = jest.fn().mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    mockRequestDefault.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
     const res = await wikiController.createFish(mockRequestDefault, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
@@ -152,22 +210,48 @@ describe('Test create Wiki function', () => {
 
 describe('Test Get All Wiki function', () => {
   it('should get all fish with a status code 200', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     mockRequest.query = {};
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
 
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      orderBy: () => createQueryBuilder,
+      getMany: () => [wikiMock],
+    };
 
-    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    fishWikiRepository.createQueryBuilder().getCount = jest
+      .fn()
+      .mockResolvedValueOnce(1);
     const res = await wikiController.getAllFish(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it('should get filtered fish with 1 parameter and a status code 200', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     mockRequest.query = {
       largeGroup: 'couro',
     };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
@@ -177,12 +261,17 @@ describe('Test Get All Wiki function', () => {
   });
 
   it('should get filtered fish with multiple parameters and a status code 200', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     mockRequest.query = {
       largeGroup: 'couro',
       group: 'famosos',
     };
     const response = mockResponse();
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
     const fishWikiRepository = connection.getRepository(FishWiki);
 
     fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
@@ -206,6 +295,11 @@ describe('Test Get One Wiki function', () => {
   it('should get a status code 200', async () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
+    mockReq.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
 
     fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce([wikiMock]),
@@ -215,12 +309,19 @@ describe('Test Get One Wiki function', () => {
   });
 
   it('should get a statusCode 404 if fishlog not found', async () => {
-    const mockRequest = {} as Request;
+    const mockRequest = {} as RequestWithUserRole;
     const fishWikiRepository = connection.getRepository(FishWiki);
 
     mockRequest.params = {
       id: '3472417428',
     };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
     const response = mockResponse();
     fishWikiRepository.findOne = jest.fn().mockResolvedValueOnce(undefined);
     const res = await wikiController.getOneFishWiki(mockRequest, response);
@@ -230,6 +331,12 @@ describe('Test Get One Wiki function', () => {
   it('should get a status code 500 request failed', async () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
+
+    mockRequestDefault.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
 
     fishWikiRepository.find = jest
       .fn()
@@ -251,25 +358,65 @@ describe('Test Delete Fish', () => {
       select: jest.fn().mockResolvedValueOnce([wikiMock]),
     }));
 
+    mockReq.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
     const createQueryBuilder: any = {
-      delete: ()  => createQueryBuilder,
+      delete: () => createQueryBuilder,
       where: () => createQueryBuilder,
       execute: () => [wikiMock],
     };
 
     jest
-    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
 
     const res = await wikiController.deleteFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should return 401', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    mockReq.user = {
+      id: '32423423565',
+      admin: false,
+      superAdmin: false,
+    };
+
+    const createQueryBuilder: any = {
+      delete: () => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => [wikiMock],
+    };
+
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    const res = await wikiController.deleteFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it('should return 404 when try to delete an unexist fish', async () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
-    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => (false));
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => false);
+
+    mockReq.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
 
     const res = await wikiController.deleteFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(404);
@@ -284,20 +431,21 @@ describe('Test Delete Fish', () => {
     }));
 
     const createQueryBuilder: any = {
-      delete: ()  => createQueryBuilder,
+      delete: () => createQueryBuilder,
       where: () => createQueryBuilder,
-      execute: () => { throw new Error },
+      execute: () => {
+        throw new Error();
+      },
     };
 
     jest
-    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
 
     const res = await wikiController.deleteFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
-
-})
+});
 
 describe('Test Update Fish', () => {
   it('should update an exist fish', async () => {
@@ -309,29 +457,67 @@ describe('Test Update Fish', () => {
     }));
 
     const createQueryBuilder: any = {
-      update: ()  => createQueryBuilder,
+      update: () => createQueryBuilder,
       set: () => createQueryBuilder,
       where: () => createQueryBuilder,
       execute: () => [wikiMock],
     };
 
     jest
-    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
 
     mockReq.body = {
-      food: "new food"
-    }
+      food: 'new food',
+    };
 
     const res = await wikiController.updateFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get 401', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+
+    const createQueryBuilder: any = {
+      update: () => createQueryBuilder,
+      set: () => createQueryBuilder,
+      where: () => createQueryBuilder,
+      execute: () => [wikiMock],
+    };
+
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    mockReq.body = {
+      food: 'new food',
+    };
+
+    mockReq.user = {
+      id: '32423423565',
+      admin: false,
+      superAdmin: false,
+    };
+
+    const res = await wikiController.updateFish(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it('should return 404 when try to update an unexist fish', async () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
 
-    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => (false));
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => false);
+    mockReq.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
 
     const res = await wikiController.updateFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(404);
@@ -346,18 +532,19 @@ describe('Test Update Fish', () => {
     }));
 
     const createQueryBuilder: any = {
-      update: ()  => createQueryBuilder,
+      update: () => createQueryBuilder,
       set: () => createQueryBuilder,
       where: () => createQueryBuilder,
-      execute: () => { throw new Error },
+      execute: () => {
+        throw new Error();
+      },
     };
 
     jest
-    .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
 
     const res = await wikiController.updateFish(mockReq, response);
     expect(res.status).toHaveBeenCalledWith(500);
   });
-
-})
+});
