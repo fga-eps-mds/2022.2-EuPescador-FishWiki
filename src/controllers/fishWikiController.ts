@@ -1,4 +1,8 @@
 import { Response } from 'express';
+import { createWriteStream } from 'fs';
+import bl from 'bl';
+import { get } from 'https';
+import sharp from 'sharp';
 import { FishWiki } from '../database/entities/fishWiki';
 import { connection } from '../database';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
@@ -74,47 +78,38 @@ export default class FishController {
     }
   };
 
+  downloadImage = async (url: string, filepath: string) => {
+    await get(url, async (res) => {
+      res.pipe(createWriteStream(filepath));
+      
+      res.on("end", async function() {
+        const cachorro = await sharp(filepath)
+            .jpeg({ quality: 10, mozjpeg: true })
+            .toBuffer();
+
+        console.log(cachorro)
+      });
+    });
+  }
+
   getAllFish = async (req: RequestWithUserRole, res: Response) => {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
-      const entries = Object.entries(req.query);
-      const count = req.query?.count !== undefined ? +req.query.count : 0;
-      const page = req.query?.page !== undefined ? +req.query.page : 1;
-      let totalPages = 1;
+      const allFishWiki = await fishWikiRepository.find();
 
-      const nonEmptyOrNull = entries.filter(
-        ([, val]) => val !== '' && val !== null
-      );
+      allFishWiki.forEach(async (data) => {
+        if (data.photo !== null) {
+          const cachorro = await sharp(`./src/public/images/${data.id}.jpg`)
+          .jpeg({ quality: 25, mozjpeg: true })
+          .toFile(`./src/public/imagesOut/${data.id}.jpg`);
 
-      if (
-        nonEmptyOrNull &&
-        (nonEmptyOrNull.length === 0 || req.query?.count !== undefined)
-      ) {
-        const allFishWiki = await fishWikiRepository
-          .createQueryBuilder('fishWiki')
-          .select()
-          .skip((page - 1) * count)
-          .take(count)
-          .getMany();
-
-        const quantityOfUsers = await fishWikiRepository
-          .createQueryBuilder('fishWiki')
-          .getCount();
-        totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
-        return res.status(200).json({ allFishWiki, page, count, totalPages });
-      }
-
-      const query = Object.fromEntries(nonEmptyOrNull);
-
-      const allFilteredFishWiki = await fishWikiRepository.find({
-        where: query,
+          console.log(cachorro)
+        }
       });
 
-      return res.status(200).json(allFilteredFishWiki);
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Falha ao processar requisição',
-      });
+      res.status(200);
+    } catch (err) {
+      console.log(err);
     }
   };
 
