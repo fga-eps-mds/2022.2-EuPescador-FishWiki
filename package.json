@@ -52,6 +52,7 @@
   "dependencies": {
     "@types/cors": "^2.8.12",
     "@types/jsonwebtoken": "^8.5.5",
+    "@types/sharp": "^0.31.1",
     "axios": "^1.2.1",
     "bcryptjs": "^2.4.3",
     "convert-excel-to-json": "^1.7.0",
@@ -64,6 +65,7 @@
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
+    "sharp": "^0.31.3",
     "supertest": "^6.1.6",
     "typeorm": "^0.3.6",
     "uuid": "^9.0.0"

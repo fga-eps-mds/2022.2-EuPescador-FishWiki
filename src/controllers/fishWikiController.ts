@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { FishWiki } from '../database/entities/fishWiki';
 import { connection } from '../database';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
+import { compressImage } from '../utils/images';
 
 export default class FishController {
   createFish = async (req: RequestWithUserRole, res: Response) => {
@@ -80,10 +81,11 @@ export default class FishController {
       const entries = Object.entries(req.query);
       const count = req.query?.count !== undefined ? +req.query.count : 0;
       const page = req.query?.page !== undefined ? +req.query.page : 1;
+      const mobile = req.query?.mobile !== undefined && req.query?.mobile !== 'false' ? true : false;
       let totalPages = 1;
 
       const nonEmptyOrNull = entries.filter(
-        ([, val]) => val !== '' && val !== null
+        ([field, val]) => val !== null && val !== '' && field !== null && field !== 'mobile' 
       );
 
       if (
@@ -101,6 +103,12 @@ export default class FishController {
           .createQueryBuilder('fishWiki')
           .getCount();
         totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
+        
+        if (mobile)
+          for (let index = 0; index < allFishWiki.length; index++)
+            if (allFishWiki[index].photo !== null)
+            allFishWiki[index].photo = await compressImage(allFishWiki[index].photo as string, 20);
+
         return res.status(200).json({ allFishWiki, page, count, totalPages });
       }
 
@@ -110,8 +118,15 @@ export default class FishController {
         where: query,
       });
 
+      if (mobile)
+        for (let index = 0; index < allFilteredFishWiki.length; index++)
+          if (allFilteredFishWiki[index].photo !== null)
+            allFilteredFishWiki[index].photo = await compressImage(allFilteredFishWiki[index].photo as string, 20);
+
       return res.status(200).json(allFilteredFishWiki);
+    
     } catch (error) {
+      console.log(error)
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
@@ -122,6 +137,7 @@ export default class FishController {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
       const fishId = req.params.id;
+      const mobile = req.query?.mobile !== undefined && req.query?.mobile !== 'false' ? true : false;
       const fishWiki = await fishWikiRepository.findOne({
         where: { id: fishId },
       });
@@ -131,6 +147,11 @@ export default class FishController {
           message: 'Peixe não encontrado',
         });
       }
+
+      console.log()
+      if(mobile && fishWiki.photo !== null)
+        fishWiki.photo = await compressImage(fishWiki.photo as string, 20);
+
       return res.status(200).json(fishWiki);
     } catch (error) {
       return res.status(500).json({
