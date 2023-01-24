@@ -4,6 +4,8 @@ import { FishWiki } from '../../src/database/entities/fishWiki';
 import { connection } from '../../src/database';
 import { RequestWithUserRole } from '../../src/Interface/fishLogInterfaces';
 
+jest.mock('../../src/utils/images');
+
 const wikiController = new WikiController();
 
 const wikiMock = {
@@ -240,10 +242,96 @@ describe('Test Get All Wiki function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
+  it('Should get all paginate fish with a status code 200', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.query = {
+      count: '2',
+      page: '2',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      orderBy: () => createQueryBuilder,
+      getMany: () => [wikiMock],
+    };
+
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    fishWikiRepository.createQueryBuilder().getCount = jest
+      .fn()
+      .mockResolvedValueOnce(1);
+    const res = await wikiController.getAllFish(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get all mobile fish with a status code 200', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.query = {
+      mobile: 'true',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      orderBy: () => createQueryBuilder,
+      getMany: () => [wikiMock],
+    };
+    jest.fn().mockResolvedValueOnce(1);
+    jest
+      .spyOn(connection.getRepository(FishWiki), 'createQueryBuilder')
+      .mockImplementation(() => createQueryBuilder);
+
+    fishWikiRepository.createQueryBuilder().getCount = jest.fn();
+    const res = await wikiController.getAllFish(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('should get filtered fish with 1 parameter and a status code 200', async () => {
     const mockRequest = {} as RequestWithUserRole;
     mockRequest.query = {
       largeGroup: 'couro',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    fishWikiRepository.find = jest.fn().mockResolvedValueOnce([wikiMock]);
+    const res = await wikiController.getAllFish(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('should get filtered mobile fish with 1 parameter and a status code 200', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.query = {
+      largeGroup: 'couro',
+      mobile: 'true',
     };
 
     mockRequest.user = {
@@ -292,9 +380,30 @@ describe('Test Get All Wiki function', () => {
 });
 
 describe('Test Get One Wiki function', () => {
-  it('should get a status code 200', async () => {
+  it('Should get a status code 200', async () => {
     const response = mockResponse();
     const fishWikiRepository = connection.getRepository(FishWiki);
+    mockReq.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
+    fishWikiRepository.findOne = jest.fn().mockImplementationOnce(() => ({
+      select: jest.fn().mockResolvedValueOnce([wikiMock]),
+    }));
+    const res = await wikiController.getOneFishWiki(mockReq, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it('Should get a status code 200', async () => {
+    const response = mockResponse();
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    mockReq.query = {
+      mobile: 'true',
+    };
+
     mockReq.user = {
       id: '32423423565',
       admin: true,

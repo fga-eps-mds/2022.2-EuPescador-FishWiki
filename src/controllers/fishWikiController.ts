@@ -81,11 +81,14 @@ export default class FishController {
       const entries = Object.entries(req.query);
       const count = req.query?.count !== undefined ? +req.query.count : 0;
       const page = req.query?.page !== undefined ? +req.query.page : 1;
-      const mobile = req.query?.mobile !== undefined && req.query?.mobile !== 'false' ? true : false;
+      const mobile = !!(
+        req.query?.mobile !== undefined && req.query?.mobile !== 'false'
+      );
       let totalPages = 1;
 
       const nonEmptyOrNull = entries.filter(
-        ([field, val]) => val !== null && val !== '' && field !== null && field !== 'mobile' 
+        ([field, val]) =>
+          val !== null && val !== '' && field !== null && field !== 'mobile'
       );
 
       if (
@@ -103,11 +106,14 @@ export default class FishController {
           .createQueryBuilder('fishWiki')
           .getCount();
         totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
-        
+
         if (mobile)
-          for (let index = 0; index < allFishWiki.length; index++)
-            if (allFishWiki[index].photo !== null)
-            allFishWiki[index].photo = await compressImage(allFishWiki[index].photo as string, 20);
+          // eslint-disable-next-line no-restricted-syntax
+          for (const data of allFishWiki) {
+            if (data.photo !== null)
+              // eslint-disable-next-line no-await-in-loop
+              data.photo = await compressImage(data.photo as string, 20);
+          }
 
         return res.status(200).json({ allFishWiki, page, count, totalPages });
       }
@@ -119,14 +125,16 @@ export default class FishController {
       });
 
       if (mobile)
-        for (let index = 0; index < allFilteredFishWiki.length; index++)
-          if (allFilteredFishWiki[index].photo !== null)
-            allFilteredFishWiki[index].photo = await compressImage(allFilteredFishWiki[index].photo as string, 20);
+        if (mobile)
+          // eslint-disable-next-line no-restricted-syntax
+          for (const data of allFilteredFishWiki) {
+            if (data.photo !== null)
+              // eslint-disable-next-line no-await-in-loop
+              data.photo = await compressImage(data.photo as string, 20);
+          }
 
       return res.status(200).json(allFilteredFishWiki);
-    
     } catch (error) {
-      console.log(error)
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
@@ -137,7 +145,9 @@ export default class FishController {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
       const fishId = req.params.id;
-      const mobile = req.query?.mobile !== undefined && req.query?.mobile !== 'false' ? true : false;
+      const mobile = !!(
+        req.query?.mobile !== undefined && req.query?.mobile !== 'false'
+      );
       const fishWiki = await fishWikiRepository.findOne({
         where: { id: fishId },
       });
@@ -148,8 +158,7 @@ export default class FishController {
         });
       }
 
-      console.log()
-      if(mobile && fishWiki.photo !== null)
+      if (mobile && fishWiki.photo !== null)
         fishWiki.photo = await compressImage(fishWiki.photo as string, 20);
 
       return res.status(200).json(fishWiki);
