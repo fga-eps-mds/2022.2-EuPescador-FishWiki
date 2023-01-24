@@ -128,3 +128,7 @@ dist
 .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+#Temp files
+
+./src/temp/*
