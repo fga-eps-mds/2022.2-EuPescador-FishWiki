@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { FishWiki } from '../database/entities/fishWiki';
 import { connection } from '../database';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
+import { compressImage } from '../utils/images';
 
 export default class FishController {
   createFish = async (req: RequestWithUserRole, res: Response) => {
@@ -26,6 +27,7 @@ export default class FishController {
         wasIntroduced,
         funFact,
         isEndemic,
+        photo,
       } = await req.body;
 
       const fish = await fishWikiRepository.findOne({
@@ -35,6 +37,12 @@ export default class FishController {
       if (!req.user?.admin && !req.user?.superAdmin) {
         return res.status(401).json({
           message: 'Você não tem permissão para criar esse registro',
+        });
+      }
+
+      if (!commonName || !largeGroup || !group) {
+        return res.status(418).json({
+          message: 'Os campos nome, grupo e grades grupos são obrigatórios',
         });
       }
 
@@ -63,6 +71,7 @@ export default class FishController {
       fishWiki.wasIntroduced = wasIntroduced;
       fishWiki.funFact = funFact;
       fishWiki.isEndemic = isEndemic;
+      fishWiki.photo = await compressImage(photo, 60);
 
       await fishWikiRepository.save(fishWiki);
 
@@ -80,10 +89,14 @@ export default class FishController {
       const entries = Object.entries(req.query);
       const count = req.query?.count !== undefined ? +req.query.count : 0;
       const page = req.query?.page !== undefined ? +req.query.page : 1;
+      const mobile = !!(
+        req.query?.mobile !== undefined && req.query?.mobile !== 'false'
+      );
       let totalPages = 1;
 
       const nonEmptyOrNull = entries.filter(
-        ([, val]) => val !== '' && val !== null
+        ([field, val]) =>
+          val !== null && val !== '' && field !== null && field !== 'mobile'
       );
 
       if (
@@ -101,6 +114,15 @@ export default class FishController {
           .createQueryBuilder('fishWiki')
           .getCount();
         totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
+
+        if (mobile)
+          // eslint-disable-next-line no-restricted-syntax
+          for (const data of allFishWiki) {
+            if (data.photo !== null)
+              // eslint-disable-next-line no-await-in-loop
+              data.photo = await compressImage(data.photo as string, 20);
+          }
+
         return res.status(200).json({ allFishWiki, page, count, totalPages });
       }
 
@@ -109,6 +131,14 @@ export default class FishController {
       const allFilteredFishWiki = await fishWikiRepository.find({
         where: query,
       });
+
+      if (mobile)
+        // eslint-disable-next-line no-restricted-syntax
+        for (const data of allFilteredFishWiki) {
+          if (data.photo !== null)
+            // eslint-disable-next-line no-await-in-loop
+            data.photo = await compressImage(data.photo as string, 20);
+        }
 
       return res.status(200).json(allFilteredFishWiki);
     } catch (error) {
@@ -122,6 +152,9 @@ export default class FishController {
     try {
       const fishWikiRepository = connection.getRepository(FishWiki);
       const fishId = req.params.id;
+      const mobile = !!(
+        req.query?.mobile !== undefined && req.query?.mobile !== 'false'
+      );
       const fishWiki = await fishWikiRepository.findOne({
         where: { id: fishId },
       });
@@ -131,6 +164,10 @@ export default class FishController {
           message: 'Peixe não encontrado',
         });
       }
+
+      if (mobile && fishWiki.photo !== null)
+        fishWiki.photo = await compressImage(fishWiki.photo as string, 20);
+
       return res.status(200).json(fishWiki);
     } catch (error) {
       return res.status(500).json({
