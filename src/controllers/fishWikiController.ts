@@ -27,6 +27,7 @@ export default class FishController {
         wasIntroduced,
         funFact,
         isEndemic,
+        photo,
       } = await req.body;
 
       const fish = await fishWikiRepository.findOne({
@@ -36,6 +37,12 @@ export default class FishController {
       if (!req.user?.admin && !req.user?.superAdmin) {
         return res.status(401).json({
           message: 'Você não tem permissão para criar esse registro',
+        });
+      }
+
+      if (!commonName || !largeGroup || !group) {
+        return res.status(418).json({
+          message: 'Os campos nome, grupo e grades grupos são obrigatórios',
         });
       }
 
@@ -64,6 +71,7 @@ export default class FishController {
       fishWiki.wasIntroduced = wasIntroduced;
       fishWiki.funFact = funFact;
       fishWiki.isEndemic = isEndemic;
+      fishWiki.photo = await compressImage(photo, 60);
 
       await fishWikiRepository.save(fishWiki);
 
