@@ -1,13 +1,10 @@
 import fs from 'fs';
-import sharp from 'sharp';
 import compressImage from '../../src/utils/images';
 
 if (!fs.existsSync('./src/temp')) fs.mkdirSync('./src/temp');
 describe('Test libary compress mobile image', () => {
   it('Should create src folder and compress image', async () => {
-    fs.existsSync = jest.fn().mockImplementation(() => false);
-    fs.mkdirSync = jest.fn().mockImplementation(() => true);
-    sharp().jpeg().toFile = jest.fn().mockImplementation(() => true);
+    fs.rmdirSync('./src/temp', { recursive: true });
 
     const img =
       'data:image/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//' +
@@ -33,10 +30,6 @@ describe('Test libary compress mobile image', () => {
   });
 
   it('Should compress image', async () => {
-    if (!fs.existsSync('./src/temp')) fs.mkdirSync('./src/temp');
-    fs.existsSync = jest.fn().mockImplementation(() => true);
-    fs.mkdirSync = jest.fn().mockImplementation(() => null);
-
     const img =
       'data:image/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//' +
       '//////////////////////////////////////////////////////////' +
