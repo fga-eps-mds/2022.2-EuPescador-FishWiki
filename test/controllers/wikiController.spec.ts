@@ -114,6 +114,42 @@ describe('Test create Wiki function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
+  it('Should get status code 418', async () => {
+    const mockRequest = {} as RequestWithUserRole;
+    const fishWikiRepository = connection.getRepository(FishWiki);
+
+    mockRequest.body = {
+      group: 'Mandís',
+      commonName: 'Mandí-chumbado',
+      scientificName: 'Aguarunichthys tocantinsensis',
+      family: 'Pimelodidae',
+      food: 'Desconhecida',
+      habitat: 'Nos canais de rios com água corrente',
+      maxSize: 80,
+      maxWeight: 14,
+      isEndemic: 'Endêmica do sistema Araguaia-Tocantins',
+      isThreatened: 'Sim. Categoria Vulnerável',
+      hasSpawningSeason: true,
+      wasIntroduced: false,
+      funFact: '',
+      photo: '',
+    };
+
+    mockRequest.user = {
+      id: '32423423565',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    fishWikiRepository.findOne = jest.fn();
+    jest
+      .spyOn(fishWikiRepository, 'save')
+      .mockImplementationOnce(() => Promise.resolve({ id: 'id' }));
+    const res = await wikiController.createFish(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(418);
+  });
+
   it('should get status code 401', async () => {
     const mockRequest = {} as RequestWithUserRole;
     const fishWikiRepository = connection.getRepository(FishWiki);
