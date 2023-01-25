@@ -133,13 +133,12 @@ export default class FishController {
       });
 
       if (mobile)
-        if (mobile)
-          // eslint-disable-next-line no-restricted-syntax
-          for (const data of allFilteredFishWiki) {
-            if (data.photo !== null)
-              // eslint-disable-next-line no-await-in-loop
-              data.photo = await compressImage(data.photo as string, 20);
-          }
+        // eslint-disable-next-line no-restricted-syntax
+        for (const data of allFilteredFishWiki) {
+          if (data.photo !== null)
+            // eslint-disable-next-line no-await-in-loop
+            data.photo = await compressImage(data.photo as string, 20);
+        }
 
       return res.status(200).json(allFilteredFishWiki);
     } catch (error) {
