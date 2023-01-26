@@ -6,10 +6,9 @@
   "scripts": {
     "test": "jest --coverage",
     "start": "NODE_PATH=./build node build/src/server.js",
-    "build": "tsc -p . && npm run copy-files",
+    "build": "tsc -p .",
     "dev": "nodemon src/server.ts",
     "lint": "eslint \"**/*.{ts,tsx}\"",
-    "copy-files": "cp ./src/utils/seed/planilha-dados.xlsx ./build/src/utils/seed/planilha-dados.xlsx",
     "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:generate src/database/migrations/defaut",
     "migration:run": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:run",
     "migration:revert": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:revert",
@@ -26,6 +25,7 @@
   },
   "homepage": "https://github.com/fga-eps-mds/2021.1-Pro-Especies-Wiki#readme",
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
     "@babel/preset-typescript": "^7.15.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/convert-excel-to-json": "^1.7.1",
@@ -55,6 +55,7 @@
     "@types/sharp": "^0.31.1",
     "axios": "^1.2.1",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.1",
     "convert-excel-to-json": "^1.7.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
