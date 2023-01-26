@@ -1,5 +1,12 @@
+/* eslint-disable camelcase */
 /* eslint-disable import/prefer-default-export */
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { v4 as uuidV4 } from 'uuid';
 
 @Entity('fishWiki')
@@ -29,10 +36,10 @@ export class FishWiki {
   habitat?: string;
 
   @Column({ nullable: true, type: 'real' })
-  maxSize?: string;
+  maxSize?: number;
 
   @Column({ nullable: true, type: 'real' })
-  maxWeight?: string;
+  maxWeight?: number;
 
   @Column({ nullable: true })
   isEndemicInfo?: string;
@@ -63,6 +70,12 @@ export class FishWiki {
 
   @Column({ nullable: true })
   photo?: string;
+
+  @CreateDateColumn()
+  created_at?: Date;
+
+  @UpdateDateColumn()
+  updated_at?: Date;
 
   constructor() {
     if (!this.id) {
