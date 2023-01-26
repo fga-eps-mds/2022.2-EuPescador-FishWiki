@@ -51,10 +51,11 @@ export default class FishController {
         });
       }
       if (photo) extension = photo.split(';')[0].split('/')[1] || null;
-
       if (
         photo &&
-        (extension !== 'jpg' || extension !== 'png' || extension !== 'jpeg')
+        extension !== 'jpg' &&
+        extension !== 'png' &&
+        extension !== 'jpeg'
       ) {
         return res.status(406).json({
           message: 'A foto deve ser enviada em formato base 64',
@@ -228,6 +229,7 @@ export default class FishController {
 
   updateFish = async (req: RequestWithUserRole, res: Response) => {
     try {
+      let extension;
       const fishWikiRepository = connection.getRepository(FishWiki);
       const fishId = req.params.id;
       const fishWiki = await fishWikiRepository.findOne({
@@ -240,11 +242,27 @@ export default class FishController {
         });
       }
 
+      if (req.body.photo)
+        extension = req.body.photo.split(';')[0].split('/')[1] || null;
+      if (
+        req.body.photo &&
+        extension !== 'jpg' &&
+        extension !== 'png' &&
+        extension !== 'jpeg'
+      ) {
+        return res.status(406).json({
+          message: 'A foto deve ser enviada em formato base 64',
+        });
+      }
+
       if (!fishWiki) {
         return res.status(404).json({
           message: 'Peixe não encontrado',
         });
       }
+
+      if (req.body.photo)
+        fishWiki.photo = await compressImage(req.body.photo as string, 60);
 
       await fishWikiRepository
         .createQueryBuilder('fishWiki')
