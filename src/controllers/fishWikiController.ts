@@ -1,12 +1,17 @@
 import { Response } from 'express';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { FishWiki } from '../database/entities/fishWiki';
 import { connection } from '../database';
 import { RequestWithUserRole } from '../Interface/fishLogInterfaces';
 import { compressImage } from '../utils/images';
 
+dayjs.extend(utc);
+
 export default class FishController {
   createFish = async (req: RequestWithUserRole, res: Response) => {
     try {
+      let extension;
       const fishWikiRepository = connection.getRepository(FishWiki);
       const {
         scientificName,
@@ -45,6 +50,16 @@ export default class FishController {
           message: 'Os campos nome, grupo e grades grupos são obrigatórios',
         });
       }
+      if (photo) extension = photo.split(';')[0].split('/')[1] || null;
+
+      if (
+        photo &&
+        (extension !== 'jpg' || extension !== 'png' || extension !== 'jpeg')
+      ) {
+        return res.status(406).json({
+          message: 'A foto deve ser enviada em formato base 64',
+        });
+      }
 
       if (fish) {
         return res.status(409).json({
@@ -60,8 +75,8 @@ export default class FishController {
       fishWiki.commonName = commonName;
       fishWiki.food = food;
       fishWiki.habitat = habitat;
-      fishWiki.maxSize = maxSize;
-      fishWiki.maxWeight = maxWeight;
+      fishWiki.maxSize = maxSize as number;
+      fishWiki.maxWeight = maxWeight as number;
       fishWiki.isEndemicInfo = isEndemicInfo;
       fishWiki.isThreatenedInfo = isThreatenedInfo;
       fishWiki.isThreatened = isThreatened;
@@ -71,10 +86,10 @@ export default class FishController {
       fishWiki.wasIntroduced = wasIntroduced;
       fishWiki.funFact = funFact;
       fishWiki.isEndemic = isEndemic;
-      fishWiki.photo = await compressImage(photo, 60);
+      fishWiki.created_at = dayjs().toDate();
+      if (photo) fishWiki.photo = await compressImage(photo as string, 60);
 
       await fishWikiRepository.save(fishWiki);
-
       return res.status(200).json(fishWiki);
     } catch (error) {
       return res.status(500).json({
@@ -106,6 +121,7 @@ export default class FishController {
         const allFishWiki = await fishWikiRepository
           .createQueryBuilder('fishWiki')
           .select()
+          .orderBy('fishWiki.created_at', 'DESC')
           .skip((page - 1) * count)
           .take(count)
           .getMany();
