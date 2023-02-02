@@ -1,13 +1,11 @@
 import 'reflect-metadata';
 import app from './app';
 import { connection } from './database';
-import fishLogSeed from './utils/seed/fishLogSeed';
 
 connection
   .initialize()
   .then(() => {
     console.log('Banco conectado!');
-    fishLogSeed();
   })
   .catch((err: any) => {
     console.log(err);
